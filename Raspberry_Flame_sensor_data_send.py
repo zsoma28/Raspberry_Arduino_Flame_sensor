@@ -3,13 +3,13 @@ import smbus
 import time
 
 apikey = "123456789"
-SLAVE_ADDRESS = 0x04
+SLAVE_ADDRESS = 0x08
 bus = smbus.SMBus(1)
 time.sleep(1) # Hagyjunk időt a busz inicializálására
 
 def send_flame_to_api(status):
     # Itt az URL-t módosítsd, ha kivetted az API kulcs ellenőrzést a PHP-ból!
-    url = f'http://192.168.0.181/sensor/insert_flame.php?status={status}'
+    url = f'http://192.168.108.168/flame/insert_flame.php?status={status}'
     
     try:
         response = requests.get(url, timeout=5)
