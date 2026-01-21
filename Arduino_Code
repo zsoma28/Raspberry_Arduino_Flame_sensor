@@ -32,5 +32,11 @@ void loop() {
 }
 
 void requestEvent() {
-  Wire.write(fireDetected);  // Küldés: 1 byte (1 vagy 0)
+  // Ha fireDetected 1, akkor '1'-et küldünk (ami a 49-es szám)
+  // Ha 0, akkor '0'-át küldünk (ami a 48-as szám)
+  if (fireDetected == 1) {
+    Wire.write('1'); 
+  } else {
+    Wire.write('0');
+  }
 }
