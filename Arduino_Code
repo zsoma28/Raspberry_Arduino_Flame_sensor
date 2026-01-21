@@ -1,0 +1,36 @@
+#include <Wire.h>
+
+#define FLAME_SENSOR_PIN 2
+#define BUZZER_PIN 3
+#define I2C_ADDRESS 0x08  // Arduino I2C slave címe
+
+byte fireDetected = 0;  // 1 ha tűz, 0 ha nem
+
+void setup() {
+  pinMode(FLAME_SENSOR_PIN, INPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+  
+  Wire.begin(I2C_ADDRESS);  // I2C slave indítása
+  Wire.onRequest(requestEvent);  // Eseménykezelő kérésre
+  Serial.begin(9600);  // Debughoz
+}
+
+void loop() {
+  int sensorValue = digitalRead(FLAME_SENSOR_PIN);
+  Serial.print("Sensor érték: ");  // Hibakeresés: nézd Serial Monitoron
+  Serial.println(sensorValue);
+  
+  if (sensorValue == HIGH) {  // Tűz érzékelve (aktív magas) – cseréld LOW-ra ha fordítva van
+    fireDetected = 1;
+    tone(BUZZER_PIN, 1000);  // Folyamatos sípolás passive buzzerhez
+  } else {
+    fireDetected = 0;
+    noTone(BUZZER_PIN);  // Sípolás leállítása
+  }
+  
+  delay(100);  // Olvasási ciklus késleltetés
+}
+
+void requestEvent() {
+  Wire.write(fireDetected);  // Küldés: 1 byte (1 vagy 0)
+}
