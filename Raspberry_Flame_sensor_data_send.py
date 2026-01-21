@@ -5,38 +5,33 @@ import time
 apikey = "123456789"
 SLAVE_ADDRESS = 0x04
 bus = smbus.SMBus(1)
+time.sleep(1) # Hagyjunk időt a busz inicializálására
 
 def send_flame_to_api(status):
-    # status: "1" (tűz) vagy "0" (nincs tűz)
-    url = f'http://192.168.0.181/sensor/insert_flame.php?api_key={apikey}&status={status}'
+    # Itt az URL-t módosítsd, ha kivetted az API kulcs ellenőrzést a PHP-ból!
+    url = f'http://192.168.0.181/sensor/insert_flame.php?status={status}'
     
     try:
         response = requests.get(url, timeout=5)
-        if response.status_code == 200:
-            print(f"Sikeres küldés! Állapot: {'TŰZ' if status == '1' else 'OK'} | Válasz: {response.text}")
-        else:
-            print(f"API hiba: {response.status_code}")
+        print(f"API Válasz: {response.text}")
     except Exception as e:
         print(f"Hálózati hiba: {e}")
 
-print("Lángérzékelő monitorozása I2C-n keresztül...")
+print("Lángérzékelő monitorozása...")
 
 while True:
     try:
-        # 1 bájt beolvasása az Arduinótól
+        # Próbáljuk megolvasni az adatot
         data = bus.read_byte(SLAVE_ADDRESS)
-        
-        # Karakterré alakítjuk (ASCII '0' vagy '1')
         status_char = chr(data)
         
-        # Csak akkor küldünk adatot, ha értelmezhető (0 vagy 1)
         if status_char in ['0', '1']:
+            print(f"Szenzor állapot: {status_char}")
             send_flame_to_api(status_char)
-        else:
-            print(f"Hibás adat érkezett: {status_char}")
-
+        
+    except OSError as e:
+        print(f"I2C hiba (I/O Error): Ellenőrizd a kábeleket és az Arduinót! {e}")
     except Exception as e:
-        print(f"I2C hiba: {e}")
+        print(f"Egyéb hiba: {e}")
     
-    # 5 másodpercenkénti frissítés
     time.sleep(5)
